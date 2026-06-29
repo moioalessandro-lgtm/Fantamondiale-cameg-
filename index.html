@@ -1,633 +1,413 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-<meta name="mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="Mondiale 2026"/>
-<meta name="theme-color" content="#0D1B2A"/>
-<title>⚽ Mondiale 2026 — Pronostici</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:#0D1B2A;color:#F0F4F8;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
-::-webkit-scrollbar{width:5px;height:5px;}
-::-webkit-scrollbar-thumb{background:#1A3A5C;border-radius:3px;}
-button{cursor:pointer;font-family:inherit;}
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Classifica Live — Sedicesimi FantaMondiale Cameg 2026</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+    :root {
+      --bg:#0a0e1a; --surface:#111827; --surface2:#1a2236;
+      --border:#1e2d45; --accent:#f59e0b; --accent2:#3b82f6;
+      --text:#f1f5f9; --muted:#64748b;
+      --win:#22c55e; --draw:#f59e0b; --loss:#ef4444;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
 
-#header{background:linear-gradient(135deg,#1A3A5C,#0D1B2A);border-bottom:2px solid #1E88E5;
-  padding:16px;position:sticky;top:0;z-index:100;}
-#header h1{font-size:17px;font-weight:800;margin-bottom:2px;}
-#header p{font-size:11px;color:#8899AA;}
-#tabs{display:flex;gap:4px;margin-top:12px;}
-.tab{flex:1;padding:8px 4px;border:none;border-radius:8px;font-size:13px;font-weight:700;
-  background:rgba(255,255,255,0.07);color:#8899AA;transition:all .15s;}
-.tab.active{background:#1E88E5;color:#fff;}
+    header {
+      background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);
+      border-bottom:2px solid var(--accent);
+      padding:1.5rem 1.5rem 1.2rem; text-align:center; position:relative; overflow:hidden;
+    }
+    header::before { content:'⚽'; position:absolute; font-size:12rem; opacity:0.04; top:-2rem; right:-2rem; transform:rotate(-15deg); }
+    .badge { display:inline-block; background:var(--accent); color:#0a0e1a; font-size:0.7rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; padding:0.25rem 0.75rem; border-radius:999px; margin-bottom:0.6rem; }
+    h1 { font-family:'Bebas Neue',cursive; font-size:clamp(1.8rem,5vw,2.8rem); letter-spacing:0.04em; color:#fff; }
+    h1 span { color:var(--accent); }
+    .subtitle { margin-top:0.3rem; color:var(--muted); font-size:0.82rem; }
 
-#content{padding:14px;}
-.section{display:none;}
-.section.active{display:block;}
+    main { max-width:900px; margin:0 auto; padding:1rem 0.75rem 3rem; }
 
-/* CLASSIFICA */
-.label{font-size:11px;color:#8899AA;letter-spacing:.5px;margin-bottom:10px;}
-.card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
-  margin-bottom:6px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.02);}
-.card.top1{background:linear-gradient(90deg,rgba(30,136,229,.22),transparent);border-color:rgba(30,136,229,.4);}
-.card.top2,.card.top3{background:rgba(255,255,255,.04);}
-.medal{width:28px;text-align:center;font-size:18px;font-weight:800;}
-.num{width:28px;text-align:center;font-size:13px;color:#8899AA;font-weight:800;}
-.info{flex:1;}
-.nome{font-size:14px;font-weight:700;}
-.bar-row{display:flex;align-items:center;gap:8px;margin-top:4px;}
-.bar-bg{flex:1;height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:3px;background:rgba(30,136,229,.5);transition:width .4s;}
-.bar-fill.top{background:#1E88E5;}
-.gbreak{font-size:11px;color:#8899AA;white-space:nowrap;}
-.circle{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:18px;font-weight:900;background:rgba(255,255,255,.07);}
-.circle.top{background:#1E88E5;}
+    .status-bar {
+      background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+      padding:0.75rem 1rem; margin-bottom:1rem;
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;
+    }
+    .status-bar .info { font-size:0.8rem; color:var(--muted); }
+    .status-bar .info strong { color:var(--text); }
+    .btn-refresh {
+      background:var(--accent2); color:#fff; border:none; border-radius:7px;
+      padding:0.45rem 1rem; font-size:0.8rem; font-weight:700; cursor:pointer;
+      transition:opacity 0.15s;
+    }
+    .btn-refresh:hover { opacity:0.85; }
+    .btn-refresh:disabled { opacity:0.5; cursor:not-allowed; }
 
-/* DETTAGLIO */
-.gtabs{display:flex;gap:5px;margin-bottom:12px;}
-.gbtn{flex:1;padding:7px;border:none;border-radius:8px;font-size:13px;font-weight:700;
-  background:rgba(255,255,255,.07);color:#8899AA;}
-.gbtn.active{background:#1E88E5;color:#fff;}
-.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-table{border-collapse:collapse;font-size:11px;width:100%;}
-th{padding:5px 3px;color:#8899AA;font-weight:700;border-bottom:1px solid rgba(255,255,255,.08);}
-th.vname{writing-mode:vertical-rl;transform:rotate(180deg);height:68px;vertical-align:bottom;
-  font-size:9px;white-space:nowrap;padding:2px;}
-td{padding:4px 3px;border-bottom:1px solid rgba(255,255,255,.03);text-align:center;}
-td.match{text-align:left;white-space:nowrap;font-weight:600;color:#F0F4F8;min-width:70px;}
-td.ris{font-weight:800;}
-.ris-badge{background:#1E88E5;color:#fff;border-radius:4px;padding:2px 6px;font-size:12px;}
-.ok{color:#00C853;font-weight:700;}
-.ko{color:#FF3B30;font-weight:700;}
-.nd{color:#8899AA;}
-td.ok-bg{background:rgba(0,200,83,.18);}
-td.ko-bg{background:rgba(255,59,48,.12);}
+    .section-label {
+      font-family:'Bebas Neue',cursive; font-size:1rem; letter-spacing:0.1em;
+      color:var(--muted); text-transform:uppercase; margin:1rem 0 0.6rem;
+      display:flex; align-items:center; gap:0.5rem;
+    }
+    .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
 
-/* INSERISCI */
-.match-row{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;
-  margin-bottom:6px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);}
-.match-row.done{background:rgba(30,136,229,.1);border-color:rgba(30,136,229,.3);}
-.match-info{flex:1;}
-.match-info b{font-size:12px;font-weight:700;}
-.match-info small{font-size:10px;color:#8899AA;display:block;}
-.btn1x2{width:38px;height:38px;border-radius:8px;border:none;font-size:15px;font-weight:800;
-  background:rgba(255,255,255,.08);color:#8899AA;transition:all .12s;}
-.btn1x2.sel1{background:#1565C0;color:#fff;}
-.btn1x2.selX{background:#6A1B9A;color:#fff;}
-.btn1x2.sel2{background:#B71C1C;color:#fff;}
-.ris-count{font-size:11px;color:#8899AA;margin-bottom:10px;}
-</style>
+    .matches-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+      gap:0.5rem; margin-bottom:1rem;
+    }
+    .match-card {
+      background:var(--surface); border:1px solid var(--border); border-radius:8px;
+      padding:0.6rem 0.8rem;
+    }
+    .match-card .teams { display:flex; justify-content:space-between; align-items:center; gap:0.3rem; }
+    .match-card .team-name { font-size:0.78rem; font-weight:600; flex:1; }
+    .match-card .team-name.right { text-align:right; }
+    .match-card .score-box {
+      font-family:'Bebas Neue',cursive; font-size:1.1rem; letter-spacing:0.05em;
+      background:var(--surface2); border-radius:5px; padding:0.1rem 0.5rem;
+      color:var(--accent); white-space:nowrap; min-width:50px; text-align:center;
+    }
+    .match-card .esito {
+      text-align:center; margin-top:0.3rem; font-size:0.7rem; font-weight:700;
+      letter-spacing:0.08em;
+    }
+    .esito.e1 { color:var(--win); }
+    .esito.eX { color:var(--draw); }
+    .esito.e2 { color:var(--loss); }
+    .esito.pending { color:var(--muted); }
+    .match-card .partita-num { font-size:0.65rem; color:var(--muted); margin-bottom:0.3rem; }
+
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+    thead th {
+      background:var(--surface2); padding:0.55rem 0.3rem;
+      text-align:center; font-size:0.62rem; font-weight:700;
+      letter-spacing:0.06em; color:var(--muted); text-transform:uppercase;
+      border-bottom:2px solid var(--border); white-space:nowrap;
+      position:sticky; top:0; z-index:2;
+    }
+    thead th.name-col { text-align:left; min-width:130px; padding-left:0.6rem; }
+    thead th.sep { border-left:2px solid var(--border); }
+    tbody tr { transition:background 0.1s; }
+    tbody tr:nth-child(even) { background:rgba(255,255,255,0.02); }
+    tbody tr:hover { background:rgba(59,130,246,0.07); }
+    td { padding:0.4rem 0.25rem; text-align:center; border-bottom:1px solid var(--border); vertical-align:middle; }
+    td.rank { color:var(--muted); font-size:0.72rem; font-weight:700; width:24px; }
+    td.name-col { text-align:left; padding-left:0.6rem; font-weight:600; white-space:nowrap; }
+    td.pts-base { font-weight:700; color:var(--accent); font-size:0.88rem; border-left:2px solid var(--border); }
+    td.pts-16 { font-weight:700; color:var(--accent2); font-size:0.88rem; }
+    td.pts-tot { font-weight:700; color:var(--win); font-size:0.92rem; border-left:2px solid var(--border); }
+    td.pos-change { font-size:0.7rem; width:20px; }
+
+    .cell { width:30px; height:26px; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; font-family:'Bebas Neue',cursive; font-size:0.9rem; border:1px solid transparent; }
+    .cell.v1 { background:rgba(34,197,94,0.18); border-color:rgba(34,197,94,0.3); color:var(--win); }
+    .cell.vX { background:rgba(245,158,11,0.18); border-color:rgba(245,158,11,0.3); color:var(--draw); }
+    .cell.v2 { background:rgba(239,68,68,0.18); border-color:rgba(239,68,68,0.3); color:var(--loss); }
+    .cell.empty { background:var(--surface2); color:var(--muted); font-size:0.6rem; }
+    .cell.ok { outline:2px solid var(--accent2); background:rgba(59,130,246,0.25); }
+
+    .medal { font-size:1rem; }
+
+    footer { text-align:center; color:var(--muted); font-size:0.73rem; padding:2rem 1rem 1.5rem; border-top:1px solid var(--border); }
+    footer a { color:var(--accent2); text-decoration:none; }
+
+    .spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--muted); border-top-color:var(--accent2); border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:4px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
 </head>
 <body>
 
-<div id="header">
-  <h1>⚽ Mondiale 2026 — Pronostici</h1>
-  <p id="subhead">Caricamento...</p>
-  <p id="api-status" style="font-size:10px;color:#1E88E5;margin-top:2px;">⏳ Connessione ai risultati live...</p>
-  <div id="tabs">
-    <button class="tab active" onclick="showTab('classifica')">🏆 Classifica</button>
-    <button class="tab" onclick="showTab('dettaglio')">📋 Dettaglio</button>
-  </div>
-  <button onclick="aggiornaRisultatiAPI()" style="width:100%;margin-top:6px;padding:8px;border:none;border-radius:8px;
-    background:rgba(0,200,83,0.15);color:#00C853;font-weight:700;font-size:12px;border:1px solid rgba(0,200,83,0.3);">
-    🔄 Aggiorna risultati ora
-  </button>
-</div>
+<header>
+  <div class="badge">⚽ FIFA World Cup 2026</div>
+  <h1>Classifica <span>Live</span></h1>
+  <p class="subtitle">Sedicesimi di finale · FantaMondiale Cameg 2026</p>
+</header>
 
-<div id="content">
-  <div id="classifica" class="section active"></div>
-  <div id="dettaglio" class="section">
-    <div class="gtabs">
-      <button class="gbtn active" onclick="setGdet(1,this)">Giornata 1</button>
-      <button class="gbtn" onclick="setGdet(2,this)">Giornata 2</button>
-      <button class="gbtn" onclick="setGdet(3,this)">Giornata 3</button>
-    </div>
-    <div id="det-table"></div>
+<main>
+  <div class="status-bar">
+    <div class="info" id="statusInfo"><span class="spinner"></span> Caricamento risultati...</div>
+    <button class="btn-refresh" id="btnRefresh" onclick="fetchRisultati()">🔄 Aggiorna</button>
   </div>
-  <div id="inserisci" class="section">
-    <div class="gtabs">
-      <button class="gbtn active" onclick="setGins(1,this)">Giornata 1</button>
-      <button class="gbtn" onclick="setGins(2,this)">Giornata 2</button>
-      <button class="gbtn" onclick="setGins(3,this)">Giornata 3</button>
-    </div>
-    <div id="ins-count" class="ris-count"></div>
-    <div id="ins-list"></div>
+
+  <div class="section-label">📊 Risultati partite</div>
+  <div class="matches-grid" id="matchesGrid"></div>
+
+  <div class="section-label">🏆 Classifica generale (gironi + sedicesimi)</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:24px">#</th>
+          <th class="name-col">Nome</th>
+          <th>SAF<br>CAN</th><th>BRA<br>JAP</th><th>GER<br>PAR</th><th>NED<br>MAR</th>
+          <th>CIV<br>NOR</th><th>FRA<br>SVE</th><th>MEX<br>ECU</th><th>ING<br>CGO</th>
+          <th>BEL<br>SEN</th><th>USA<br>BIH</th><th>ESP<br>AUT</th><th>POR<br>CRO</th>
+          <th>SUI<br>ALG</th><th>AUS<br>EGI</th><th>ARG<br>CPV</th><th>COL<br>GHA</th>
+          <th class="sep">BASE</th><th>+16</th><th class="sep">TOT</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
   </div>
-</div>
+
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;font-size:0.73rem;color:var(--muted);">
+    <span>🟦 = pronostico esatto</span>
+    <span style="margin-left:auto">BASE = gironi · +16 = sedicesimi · TOT = totale</span>
+  </div>
+</main>
+
+<footer>
+  FantaMondiale Cameg 2026 · <a href="https://moioalessandro-lgtm.github.io/Fantamondiale-cameg-/?v=2" target="_blank">Apri l'App</a>
+</footer>
 
 <script>
-// ── DATI ──────────────────────────────────────────────────────────────────────
-var G = [
- { id:1, partite:[
-  {id:"MEX-SUD",  H:"MEX",  A:"SUD",  hn:"Messico",        an:"Sudafrica"},
-  {id:"COR-CEC",  H:"COR",  A:"CEC",  hn:"Corea del Sud",  an:"Rep. Ceca"},
-  {id:"CAN-BOS",  H:"CAN",  A:"BOS",  hn:"Canada",         an:"Bosnia"},
-  {id:"USA-PAR",  H:"USA",  A:"PAR",  hn:"USA",            an:"Paraguay"},
-  {id:"QAT-SVIZ", H:"QAT",  A:"SVI",  hn:"Qatar",          an:"Svizzera"},
-  {id:"BRA-MAR",  H:"BRA",  A:"MAR",  hn:"Brasile",        an:"Marocco"},
-  {id:"HAI-SCO",  H:"HAI",  A:"SCO",  hn:"Haiti",          an:"Scozia"},
-  {id:"AUS-TUR",  H:"AUS",  A:"TUR",  hn:"Australia",      an:"Turchia"},
-  {id:"GER-CURA", H:"GER",  A:"CUR",  hn:"Germania",       an:"Curaçao"},
-  {id:"NED-JAP",  H:"NED",  A:"JAP",  hn:"Olanda",         an:"Giappone"},
-  {id:"CAV-ECU",  H:"CAV",  A:"ECU",  hn:"C. d'Avorio",    an:"Ecuador"},
-  {id:"SVE-TUN",  H:"SVE",  A:"TUN",  hn:"Svezia",         an:"Tunisia"},
-  {id:"SPA-CAVE", H:"SPA",  A:"CVE",  hn:"Spagna",         an:"Capo Verde"},
-  {id:"BEL-EGI",  H:"BEL",  A:"EGI",  hn:"Belgio",         an:"Egitto"},
-  {id:"SAUDI-URU",H:"SAU",  A:"URU",  hn:"Arabia Saudita", an:"Uruguay"},
-  {id:"IRAN-NZEL",H:"IRN",  A:"NZL",  hn:"Iran",           an:"Nuova Zelanda"},
-  {id:"FRA-SEN",  H:"FRA",  A:"SEN",  hn:"Francia",        an:"Senegal"},
-  {id:"IRAQ-NOR", H:"IRQ",  A:"NOR",  hn:"Iraq",           an:"Norvegia"},
-  {id:"ARG-ALG",  H:"ARG",  A:"ALG",  hn:"Argentina",      an:"Algeria"},
-  {id:"AUS-GIOR", H:"AUT",  A:"GIO",  hn:"Austria",        an:"Giordania"},
-  {id:"POR-CONGO",H:"POR",  A:"CGO",  hn:"Portogallo",     an:"Congo"},
-  {id:"ING-CROA", H:"ENG",  A:"CRO",  hn:"Inghilterra",    an:"Croazia"},
-  {id:"GHA-PAN",  H:"GHA",  A:"PAN",  hn:"Ghana",          an:"Panama"},
-  {id:"UZB-COL",  H:"UZB",  A:"COL",  hn:"Uzbekistan",     an:"Colombia"},
- ]},
- { id:2, partite:[
-  {id:"CEC-SUD2",   H:"CEC", A:"SUD", hn:"Rep. Ceca",      an:"Sudafrica"},
-  {id:"SVI-BOS2",   H:"SVI", A:"BOS", hn:"Svizzera",       an:"Bosnia"},
-  {id:"CAN-QAT2",   H:"CAN", A:"QAT", hn:"Canada",         an:"Qatar"},
-  {id:"MEX-COR2",   H:"MEX", A:"COR", hn:"Messico",        an:"Corea del Sud"},
-  {id:"USA-AUS2",   H:"USA", A:"AUS", hn:"USA",            an:"Australia"},
-  {id:"SCO-MAR2",   H:"SCO", A:"MAR", hn:"Scozia",         an:"Marocco"},
-  {id:"BRA-HAI2",   H:"BRA", A:"HAI", hn:"Brasile",        an:"Haiti"},
-  {id:"TUR-PAR2",   H:"TUR", A:"PAR", hn:"Turchia",        an:"Paraguay"},
-  {id:"NED-SVE2",   H:"NED", A:"SVE", hn:"Olanda",         an:"Svezia"},
-  {id:"GER-CAV2",   H:"GER", A:"CAV", hn:"Germania",       an:"C. d'Avorio"},
-  {id:"ECU-CURA2",  H:"ECU", A:"CUR", hn:"Ecuador",        an:"Curaçao"},
-  {id:"TUN-JAP2",   H:"TUN", A:"JAP", hn:"Tunisia",        an:"Giappone"},
-  {id:"SPA-SAUDI2", H:"SPA", A:"SAU", hn:"Spagna",         an:"Arabia Saudita"},
-  {id:"BEL-IRAN2",  H:"BEL", A:"IRN", hn:"Belgio",         an:"Iran"},
-  {id:"URU-CAVE2",  H:"URU", A:"CVE", hn:"Uruguay",        an:"Capo Verde"},
-  {id:"NZEL-EGI2",  H:"NZL", A:"EGI", hn:"Nuova Zelanda",  an:"Egitto"},
-  {id:"ARG-AUS2",   H:"ARG", A:"AUT", hn:"Argentina",      an:"Austria"},
-  {id:"FRA-IRAQ2",  H:"FRA", A:"IRQ", hn:"Francia",        an:"Iraq"},
-  {id:"NOR-SEN2",   H:"NOR", A:"SEN", hn:"Norvegia",       an:"Senegal"},
-  {id:"GIOR-ALG2",  H:"GIO", A:"ALG", hn:"Giordania",      an:"Algeria"},
-  {id:"POR-UZB2",   H:"POR", A:"UZB", hn:"Portogallo",     an:"Uzbekistan"},
-  {id:"ING-GHA2",   H:"ENG", A:"GHA", hn:"Inghilterra",    an:"Ghana"},
-  {id:"PAN-CRO2",   H:"PAN", A:"CRO", hn:"Panama",         an:"Croazia"},
-  {id:"COL-CONGO2", H:"COL", A:"CGO", hn:"Colombia",       an:"Congo"},
- ]},
- { id:3, partite:[
-  {id:"SVI-CAN3",    H:"SVI", A:"CAN", hn:"Svizzera",        an:"Canada"},
-  {id:"BOS-QAT3",    H:"BOS", A:"QAT", hn:"Bosnia",          an:"Qatar"},
-  {id:"MAR-HAI3",    H:"MAR", A:"HAI", hn:"Marocco",         an:"Haiti"},
-  {id:"SCO-BRA3",    H:"SCO", A:"BRA", hn:"Scozia",          an:"Brasile"},
-  {id:"SUD-COR3",    H:"SUD", A:"COR", hn:"Sudafrica",       an:"Corea del Sud"},
-  {id:"CEC-MEX3",    H:"CEC", A:"MEX", hn:"Rep. Ceca",       an:"Messico"},
-  {id:"CUR-CAV3",    H:"CUR", A:"CAV", hn:"Curaçao",         an:"C. d'Avorio"},
-  {id:"ECU-GER3",    H:"ECU", A:"GER", hn:"Ecuador",         an:"Germania"},
-  {id:"TUN-NED3",    H:"TUN", A:"NED", hn:"Tunisia",         an:"Olanda"},
-  {id:"JAP-SVE3",    H:"JAP", A:"SVE", hn:"Giappone",        an:"Svezia"},
-  {id:"TUR-USA3",    H:"TUR", A:"USA", hn:"Turchia",         an:"USA"},
-  {id:"PAR-AUS3",    H:"PAR", A:"AUS", hn:"Paraguay",        an:"Australia"},
-  {id:"NOR-FRA3",    H:"NOR", A:"FRA", hn:"Norvegia",        an:"Francia"},
-  {id:"SEN-IRAQ3",   H:"SEN", A:"IRQ", hn:"Senegal",         an:"Iraq"},
-  {id:"CAVE-SAUDI3", H:"CVE", A:"SAU", hn:"Capo Verde",      an:"Arabia Saudita"},
-  {id:"URU-SPA3",    H:"URU", A:"SPA", hn:"Uruguay",         an:"Spagna"},
-  {id:"NZEL-BEL3",   H:"NZL", A:"BEL", hn:"Nuova Zelanda",  an:"Belgio"},
-  {id:"EGI-IRAN3",   H:"EGI", A:"IRN", hn:"Egitto",          an:"Iran"},
-  {id:"PAN-ING3",    H:"PAN", A:"ENG", hn:"Panama",          an:"Inghilterra"},
-  {id:"CRO-GHA3",    H:"CRO", A:"GHA", hn:"Croazia",         an:"Ghana"},
-  {id:"COL-POR3",    H:"COL", A:"POR", hn:"Colombia",        an:"Portogallo"},
-  {id:"CONGO-UZB3",  H:"CGO", A:"UZB", hn:"Congo",           an:"Uzbekistan"},
-  {id:"ALG-AUS3",    H:"ALG", A:"AUT", hn:"Algeria",         an:"Austria"},
-  {id:"GIOR-ARG3",   H:"GIO", A:"ARG", hn:"Giordania",       an:"Argentina"},
- ]},
+// ─── DATI PARTECIPANTI ───────────────────────────────────────────────
+const PARTECIPANTI = [
+  { nome:"Ivan",              base:49 },
+  { nome:"Simone",            base:45 },
+  { nome:"Luigi",             base:44 },
+  { nome:"Vittorio",          base:43 },
+  { nome:"Andrea Magliano",   base:42 },
+  { nome:"Andrea Udito",      base:42 },
+  { nome:"Raffaele Turco",    base:42 },
+  { nome:"Giuseppe D'Altrui", base:41 },
+  { nome:"Fabio",             base:41 },
+  { nome:"Michele",           base:41 },
+  { nome:"Massimo Moio",      base:41 },
+  { nome:"Dario",             base:41 },
+  { nome:"Gianni Di Scala",   base:40 },
+  { nome:"Antonio Esposito",  base:40 },
+  { nome:"Roberto Pappa",     base:40 },
+  { nome:"Alessandro Moio",   base:39 },
+  { nome:"Giuseppe Cangiano", base:38 },
+  { nome:"Fulvio",            base:37 },
+  { nome:"Vincenzo Ambra",    base:36 },
+  { nome:"Enrico Caruso",     base:36 },
+  { nome:"Antonio Orefice",   base:34 },
+  { nome:"Marco",             base:33 },
+  { nome:"Andrea Cangiano",   base:32 },
+  { nome:"Enrico Popolo",     base:32 },
 ];
 
-var GIOCATORI = [
- "LUIGI","GIUSEPPE D'ALTRUI","FABIO","ANDREA CANGIANO","FULVIO","MICHELE",
- "MASSIMO MOIO","GIUSEPPE CANGIANO","ENRICO POPOLO","ANDREA MAGLIANO","DARIO",
- "MARCO","ANDREA UDITO","GIANNI DI SCALA","VINCENZO AMBRA","IVAN","ENRICO CARUSO",
- "ANTONIO OREFICE","ALESSANDRO MOIO","RAFFAELE TURCO","ANTONIO ESPOSITO",
- "ROBERTO PAPPA","VITTORIO","SIMONE"
+// ─── PRONOSTICI ───────────────────────────────────────────────────────
+// Partite: 0=SAF-CAN, 1=BRA-JAP, 2=GER-PAR, 3=NED-MAR, 4=CIV-NOR,
+//          5=FRA-SVE,  6=MEX-ECU, 7=ING-CGO, 8=BEL-SEN, 9=USA-BIH,
+//         10=ESP-AUT, 11=POR-CRO, 12=SUI-ALG,13=AUS-EGI,14=ARG-CPV, 15=COL-GHA
+const PRONOSTICI = [
+  ['2','1','1','X','2','1','1','1','1','1','1','X','X','2','1','1'],
+  ['2','1','1','1','2','1','1','1','1','1','1','2','1','1','1','1'],
+  ['2','1','1','2','2','1','1','1','1','1','1','2','X','X','1','1'],
+  ['2','1','1','1','2','1','1','1','1','1','1','1','1','2','1','1'],
+  ['2','X','1','X','X','1','X','1','X','1','1','1','1','2','1','1'],
+  ['X','1','1','X','2','1','1','X','X','X','1','1','1','2','1','X'],
+  ['2','1','1','X','X','1','1','1','1','1','1','1','1','X','1','X'],
+  ['X','X','1','X','X','1','1','1','X','1','1','1','X','2','1','1'],
+  ['X','1','1','X','2','1','X','1','X','1','1','1','1','X','1','1'],
+  ['2','X','1','X','2','1','X','1','2','1','X','2','1','2','1','X'],
+  ['2','1','1','2','2','1','1','1','X','1','1','X','X','X','1','1'],
+  ['2','X','1','2','X','1','1','1','X','1','1','X','1','X','1','X'],
+  ['2','1','1','X','2','1','1','1','1','1','1','X','1','1','1','X'],
+  ['X','1','1','2','2','1','X','1','1','2','1','1','X','2','1','2'],
+  ['2','1','1','1','2','1','2','1','1','1','1','1','1','2','1','1'],
+  ['X','1','1','X','2','1','1','1','X','1','1','1','1','X','1','1'],
+  ['2','1','X','1','2','1','1','1','1','1','X','1','1','1','1','X'],
+  [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+  [null,'1','1','X','2','1','1','1','1','1','X','1','1','2','1','1'],
+  ['1','1','1','2','2','1','1','1','1','2','1','2','1','1','1','1'],
+  ['2','X','1','X','1','1','1','1','X','1','1','X','1','2','1','1'],
+  ['2','X','1','2','2','1','1','1','1','1','1','X','1','2','1','1'],
+  ['2','1','1','X','2','1','1','1','1','1','1','X','1','2','1','1'],
+  ['2','1','1','1','2','1','1','1','X','1','1','X','1','2','1','1'],
 ];
 
-var P = [
- // G1
- {"LUIGI":["1","2","2","1","2","1","2","1","1","X","X","1","1","1","2","1","1","2","1","1","1","1","1","2"],
-  "GIUSEPPE D'ALTRUI":["X","X","1","X","2","X","2","2","1","1","X","1","1","1","2","1","1","2","1","1","1","1","1","2"],
-  "FABIO":["1","X","X","1","2","X","2","2","1","X","X","1","1","1","2","1","1","2","1","1","1","1","1","2"],
-  "ANDREA CANGIANO":["1","X","2","2","X","1","2","1","1","1","2","X","1","1","2","2","1","X","1","1","1","1","X","X"],
-  "FULVIO":["1","1","1","2","2","1","2","2","1","1","2","1","X","1","X","2","1","2","1","X","X","1","X","2"],
-  "MICHELE":["1","2","X","1","2","X","2","2","1","1","X","1","1","1","2","X","1","2","1","1","1","X","1","2"],
-  "MASSIMO MOIO":["1","2","1","X","2","1","2","2","1","1","1","1","1","1","2","1","1","2","1","X","1","1","2","2"],
-  "GIUSEPPE CANGIANO":["1","1","2","2","2","1","2","1","1","1","1","1","1","1","X","X","1","2","1","X","1","X","X","X"],
-  "ENRICO POPOLO":["1","2","X","2","2","1","2","2","1","1","1","X","1","1","2","1","1","2","1","1","1","1","1","2"],
-  "ANDREA MAGLIANO":["1","1","X","1","X","1","2","X","1","2","1","X","1","1","2","1","1","2","1","1","1","1","1","2"],
-  "DARIO":["1","1","X","1","2","X","2","2","1","X","1","X","1","1","X","1","1","1","1","1","1","1","1","2"],
-  "MARCO":["1","X","2","2","2","1","X","2","1","1","X","2","1","1","2","X","1","X","1","1","1","1","X","X"],
-  "ANDREA UDITO":["1","X","X","1","2","1","2","2","1","X","2","X","1","1","2","X","1","2","1","1","1","1","1","2"],
-  "GIANNI DI SCALA":["1","X","1","1","2","1","2","2","1","1","X","X","1","1","2","2","1","2","1","X","1","1","X","2"],
-  "VINCENZO AMBRA":["1","1","X","1","2","1","X","2","1","1","X","2","1","1","2","2","X","2","1","2","1","1","X","2"],
-  "IVAN":["1","X","X","1","2","X","2","2","1","1","1","1","1","1","2","X","1","2","1","1","1","1","1","2"],
-  "ENRICO CARUSO":["1","1","2","2","2","1","2","2","1","1","X","2","1","1","2","2","1","1","1","1","1","1","1","1"],
-  "ANTONIO OREFICE":["X","1","X","1","2","1","2","2","1","X","X","X","1","1","2","1","1","2","1","1","1","X","1","X"],
-  "ALESSANDRO MOIO":["1","X","1","X","2","1","2","X","1","1","X","1","1","1","2","1","1","2","1","1","1","1","1","X"],
-  "RAFFAELE TURCO":["1","X","2","X","2","1","2","2","1","X","2","1","1","1","2","1","1","2","1","1","1","1","1","X"],
-  "ANTONIO ESPOSITO":["1","X","2","1","2","X","2","2","1","1","2","1","1","1","2","X","1","2","1","1","1","X","1","X"],
-  "ROBERTO PAPPA":["1","1","2","X","1","2","X","1","1","X","2","2","1","1","2","X","1","2","1","X","1","1","1","2"],
-  "VITTORIO":["1","1","1","1","2","1","2","2","1","1","1","1","1","1","2","1","1","2","1","1","1","1","1","1"],
-  "SIMONE":["1","X","2","1","2","1","2","2","1","1","1","X","1","1","2","X","1","2","1","1","1","1","1","2"]},
- // G2
- {"LUIGI":["X","1","1","1","X","1","1","1","1","1","1","2","1","1","1","X","1","1","1","2","1","1","2","1"],
-  "GIUSEPPE D'ALTRUI":["X","X","1","1","1","2","1","X","X","X","1","2","1","1","1","2","1","1","X","2","1","1","2","1"],
-  "FABIO":["1","1","1","X","1","X","1","1","1","1","1","2","1","1","1","2","1","1","X","2","1","1","2","1"],
-  "ANDREA CANGIANO":["2","X","X","1","1","1","1","2","1","1","1","X","1","1","1","1","1","1","X","X","1","1","X","X"],
-  "FULVIO":["X","1","X","1","2","1","1","2","X","1","X","2","1","1","1","2","1","1","1","X","X","1","X","2"],
-  "MICHELE":["1","1","1","X","X","1","1","1","1","1","1","2","1","1","1","X","1","1","1","2","1","1","2","1"],
-  "MASSIMO MOIO":["1","2","1","1","1","1","1","1","1","1","X","X","1","1","1","1","1","1","1","X","1","1","2","1"],
-  "GIUSEPPE CANGIANO":["X","1","1","1","1","1","1","X","1","X","X","X","1","1","1","1","1","1","1","X","1","1","X","X"],
-  "ENRICO POPOLO":["1","1","1","2","2","1","1","1","1","1","2","X","1","1","1","2","1","1","1","X","1","1","2","X"],
-  "ANDREA MAGLIANO":["2","1","1","X","1","2","1","1","1","1","1","2","1","1","1","2","X","1","X","2","1","X","2","X"],
-  "DARIO":["1","X","1","X","X","2","1","1","1","1","1","X","1","1","1","1","X","1","1","2","1","1","2","1"],
-  "MARCO":["1","1","X","X","1","2","1","1","1","1","2","2","1","1","1","X","1","1","2","2","1","1","2","1"],
-  "ANDREA UDITO":["1","1","X","X","1","X","1","1","1","1","1","2","1","1","1","2","1","1","1","2","1","1","2","1"],
-  "GIANNI DI SCALA":["X","1","X","X","1","2","1","1","1","1","X","2","1","1","1","X","1","1","2","X","1","1","2","1"],
-  "VINCENZO AMBRA":["2","1","X","1","1","2","1","2","X","1","1","1","1","X","X","2","X","1","2","X","1","2","X","1"],
-  "IVAN":["X","1","1","X","1","X","1","1","1","1","1","X","1","1","1","2","1","1","1","2","1","1","2","1"],
-  "ENRICO CARUSO":["1","1","1","1","1","1","1","2","1","1","1","1","1","1","1","1","1","1","X","X","1","1","2","1"],
-  "ANTONIO OREFICE":["2","X","X","1","1","X","1","1","1","1","1","2","1","1","1","X","1","1","2","2","1","1","2","1"],
-  "ALESSANDRO MOIO":["1","1","1","X","2","1","1","1","1","1","1","1","1","1","1","2","1","1","1","X","1","1","2","1"],
-  "RAFFAELE TURCO":["1","X","1","X","1","X","1","1","X","1","1","2","1","1","1","2","1","1","1","2","1","1","2","1"],
-  "ANTONIO ESPOSITO":["1","1","1","X","X","2","1","1","X","1","2","2","1","1","1","2","1","1","1","2","1","1","2","1"],
-  "ROBERTO PAPPA":["X","2","1","X","1","1","1","X","1","1","X","X","1","1","1","2","1","1","2","2","1","1","2","1"],
-  "VITTORIO":["1","1","1","X","1","2","1","1","1","1","1","2","1","1","1","2","1","1","1","1","1","1","2","1"],
-  "SIMONE":["1","1","X","1","1","1","1","1","1","1","1","2","1","1","1","2","1","1","1","2","1","1","2","1"]},
- // G3
- {"LUIGI":["1","1","1","2","2","2","2","2","2","1","1","1","X","1","2","X","2","X","2","1","2","2","2","2"],
-  "GIUSEPPE D'ALTRUI":["X","1","1","2","2","X","2","2","2","X","X","1","X","1","1","2","2","X","2","X","X","1","X","2"],
-  "FABIO":["1","1","1","2","2","X","2","2","2","1","X","1","X","1","1","X","2","1","2","1","2","X","2","2"],
-  "ANDREA CANGIANO":["X","2","1","2","X","2","2","2","2","1","X","X","2","X","X","2","2","X","2","X","2","X","X","X"],
-  "FULVIO":["X","2","X","2","X","2","X","2","2","X","X","X","2","1","2","2","2","1","2","X","1","X","1","2"],
-  "MICHELE":["X","2","2","2","X","2","2","2","2","2","1","X","1","1","X","2","2","1","2","1","2","2","2","2"],
-  "MASSIMO MOIO":["1","1","1","2","2","2","2","2","2","X","1","1","2","1","2","2","2","2","2","1","2","X","X","2"],
-  "GIUSEPPE CANGIANO":["1","X","X","2","2","2","X","2","2","1","1","X","2","X","X","1","1","X","2","1","X","X","1","2"],
-  "ENRICO POPOLO":["1","1","1","X","2","2","1","X","2","1","X","X","X","2","1","1","1","2","1","2","1","1","X","X"],
-  "ANDREA MAGLIANO":["1","2","1","1","X","2","2","1","2","1","1","1","2","X","X","X","2","1","2","2","1","2","1","2"],
-  "DARIO":["X","X","1","2","X","2","2","2","X","X","1","1","X","1","2","2","2","2","2","1","X","X","1","2"],
-  "MARCO":["X","X","X","2","2","X","2","2","2","1","X","1","2","1","X","2","2","1","2","1","2","2","X","2"],
-  "ANDREA UDITO":["1","1","1","2","X","2","2","X","2","1","X","1","2","1","2","X","2","1","2","1","X","2","2","1"],
-  "GIANNI DI SCALA":["1","X","1","2","2","2","2","2","2","1","1","1","2","1","X","X","2","X","2","X","2","1","X","2"],
-  "VINCENZO AMBRA":["2","1","X","2","1","X","2","X","1","2","X","1","2","1","X","2","2","X","2","1","2","X","2","2"],
-  "IVAN":["1","1","1","2","2","2","2","2","2","X","1","1","2","1","2","X","2","1","2","1","1","1","X","2"],
-  "ENRICO CARUSO":["1","1","1","2","X","1","1","2","2","2","1","1","2","1","1","2","X","1","2","1","2","1","1","2"],
-  "ANTONIO OREFICE":["1","1","1","X","2","2","X","2","2","1","2","2","1","2","2","2","1","2","2","1","X","1","2","X"],
-  "ALESSANDRO MOIO":["1","1","1","2","1","2","X","2","X","X","X","1","X","1","X","2","2","1","2","1","X","X","X","2"],
-  "RAFFAELE TURCO":["1","1","1","2","X","X","2","2","2","X","1","1","2","1","2","2","2","X","2","1","2","2","X","2"],
-  "ANTONIO ESPOSITO":["1","1","1","X","X","1","X","2","2","X","X","X","X","1","1","2","2","1","2","1","X","X","2","2"],
-  "ROBERTO PAPPA":["2","1","1","1","X","2","X","2","2","X","2","1","2","1","2","2","2","X","2","1","2","X","1","2"],
-  "VITTORIO":["X","1","1","2","2","2","2","2","2","1","1","1","X","1","2","2","2","2","2","1","2","1","1","2"],
-  "SIMONE":["1","1","1","2","X","2","2","2","X","X","1","X","2","1","2","2","2","1","2","1","2","2","1","2"]}
+// ─── PARTITE INFO ─────────────────────────────────────────────────────
+const PARTITE_INFO = [
+  { label:'Sudafrica – Canada',         home:'SAF', away:'CAN' },
+  { label:'Brasile – Giappone',         home:'BRA', away:'JAP' },
+  { label:'Germania – Paraguay',        home:'GER', away:'PAR' },
+  { label:'Paesi Bassi – Marocco',      home:'NED', away:'MAR' },
+  { label:"Costa d'Avorio – Norvegia",  home:'CIV', away:'NOR' },
+  { label:'Francia – Svezia',           home:'FRA', away:'SVE' },
+  { label:'Messico – Ecuador',          home:'MEX', away:'ECU' },
+  { label:'Inghilterra – Congo',        home:'ING', away:'CGO' },
+  { label:'Belgio – Senegal',           home:'BEL', away:'SEN' },
+  { label:'USA – Bosnia',               home:'USA', away:'BIH' },
+  { label:'Spagna – Austria',           home:'ESP', away:'AUT' },
+  { label:'Portogallo – Croazia',       home:'POR', away:'CRO' },
+  { label:'Svizzera – Algeria',         home:'SUI', away:'ALG' },
+  { label:'Australia – Egitto',         home:'AUS', away:'EGI' },
+  { label:'Argentina – Capo Verde',     home:'ARG', away:'CPV' },
+  { label:'Colombia – Ghana',           home:'COL', away:'GHA' },
 ];
 
-// ── RISULTATI NOTI ────────────────────────────────────────────────────────────
-var RIS = {
- "MEX-SUD":"1",    // Messico 2-0 Sudafrica
- "COR-CEC":"1",    // Corea del Sud 2-1 Rep. Ceca
- "CAN-BOS":"X",    // Canada 1-1 Bosnia
- "USA-PAR":"1",    // USA 4-1 Paraguay
- "QAT-SVIZ":"X",   // Qatar 1-1 Svizzera (Khoukhi 90+4')
- "BRA-MAR":"X",    // Brasile 1-1 Marocco (Saibari 21', Vinicius 32')
- "HAI-SCO":"2",    // Haiti 0-1 Scozia (McGinn 28')
- "AUS-TUR":"1",    // Australia 2-0 Turchia (Irankunda 27', Metcalfe 75')
- "GER-CURA":"1",   // Germania 7-1 Curaçao (Nmecha, Havertz x2, Schlotterbeck, Musiala, Brown, Undav)
- "NED-JAP":"X",    // Olanda 2-2 Giappone (Summerville 64', Kamada 90+2')
- "CAV-ECU":"1",    // C. d'Avorio 1-0 Ecuador (Amad Diallo 90')
- "SVE-TUN":"1",    // Svezia 5-1 Tunisia (Ayari, Isak x2...)
+// ─── TEAM MAP ─────────────────────────────────────────────────────────
+const TEAM_MAP = {
+  'South Africa':0,'Canada':0,
+  'Brazil':1,'Japan':1,
+  'Germany':2,'Paraguay':2,
+  'Netherlands':3,'Morocco':3,
+  'Ivory Coast':4,"Côte d'Ivoire":4,'Norway':4,
+  'France':5,'Sweden':5,
+  'Mexico':6,'Ecuador':6,
+  'England':7,'DR Congo':7,'Congo':7,
+  'Belgium':8,'Senegal':8,
+  'United States':9,'USA':9,'Bosnia and Herzegovina':9,
+  'Spain':10,'Austria':10,
+  'Portugal':11,'Croatia':11,
+  'Switzerland':12,'Algeria':12,
+  'Australia':13,'Egypt':13,
+  'Argentina':14,'Cape Verde':14,
+  'Colombia':15,'Ghana':15,
 };
 
-// ── STATO ─────────────────────────────────────────────────────────────────────
+let risultati = new Array(16).fill(null);
+let scores    = new Array(16).fill(null);
+let lastUpdate = null;
 
-// ═══════════════════════════════════════════════════════════════════════════
-// AUTO-AGGIORNAMENTO RISULTATI via football-data.org API
-// ═══════════════════════════════════════════════════════════════════════════
-var API_KEY = "46e1be88d1f141c9a5392183c875d71c";
-var API_URL = "https://api.football-data.org/v4/competitions/WC/matches?season=2026";
-// Proxy CORS necessario perché football-data.org blocca chiamate dirette dal browser
-var PROXY = "https://corsproxy.io/?url=";
+// ─── FETCH con fallback proxy ─────────────────────────────────────────
+async function fetchWithFallback(apiUrl, apiKey) {
+  // Strategia 1: chiave nell'URL query param (evita problemi header nei proxy)
+  const urlWithKey = `${apiUrl}&X-Auth-Token=${apiKey}`;
 
-// Mappa nomi squadre (come restituiti dall'API, in inglese) -> codici usati nelle partite
-var TEAM_MAP = {
-  "Mexico":"MEX",
-  "South Africa":"SUD",
-  "South Korea":"COR","Korea Republic":"COR","Korea, South":"COR","Republic of Korea":"COR",
-  "Czech Republic":"CEC","Czechia":"CEC","Czech Rep.":"CEC",
-  "Canada":"CAN",
-  "Bosnia and Herzegovina":"BOS","Bosnia & Herzegovina":"BOS","Bosnia-Herzegovina":"BOS","Bosnia":"BOS",
-  "United States":"USA","USA":"USA","United States of America":"USA",
-  "Paraguay":"PAR",
-  "Qatar":"QAT",
-  "Switzerland":"SVI",
-  "Brazil":"BRA",
-  "Morocco":"MAR",
-  "Haiti":"HAI",
-  "Scotland":"SCO",
-  "Australia":"AUS",
-  "Turkey":"TUR","Türkiye":"TUR","Turkiye":"TUR",
-  "Germany":"GER",
-  "Curaçao":"CUR","Curacao":"CUR",
-  "Netherlands":"NED","Holland":"NED",
-  "Japan":"JAP",
-  "Ivory Coast":"CAV","Côte d'Ivoire":"CAV","Cote d'Ivoire":"CAV","Côte d’Ivoire":"CAV",
-  "Ecuador":"ECU",
-  "Sweden":"SVE",
-  "Tunisia":"TUN",
-  "Spain":"SPA",
-  "Cape Verde":"CVE","Cabo Verde":"CVE","Cape Verde Islands":"CVE",
-  "Belgium":"BEL",
-  "Egypt":"EGI",
-  "Saudi Arabia":"SAU","Saudi-Arabia":"SAU",
-  "Uruguay":"URU",
-  "Iran":"IRN","Iran, Islamic Republic of":"IRN","IR Iran":"IRN",
-  "New Zealand":"NZL",
-  "France":"FRA",
-  "Senegal":"SEN",
-  "Iraq":"IRQ",
-  "Norway":"NOR",
-  "Argentina":"ARG",
-  "Algeria":"ALG",
-  "Austria":"AUT",
-  "Jordan":"GIO",
-  "Portugal":"POR",
-  "Congo DR":"CGO","DR Congo":"CGO","DR Congo (Congo DR)":"CGO","Congo":"CGO","Democratic Republic of the Congo":"CGO",
-  "England":"ENG",
-  "Croatia":"CRO",
-  "Ghana":"GHA",
-  "Panama":"PAN",
-  "Uzbekistan":"UZB",
-  "Colombia":"COL"
-};
+  const proxies = [
+    // proxy 1: corsproxy.io con chiave nell'URL
+    `https://corsproxy.io/?url=${encodeURIComponent(urlWithKey)}`,
+    // proxy 2: allorigins (più affidabile con header)
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(urlWithKey)}`,
+    // proxy 3: thingproxy come ulteriore fallback
+    `https://thingproxy.freeboard.io/fetch/${urlWithKey}`,
+  ];
 
-function codiceSquadra(nomeAPI) {
-  return TEAM_MAP[nomeAPI] || null;
-}
-
-// Costruisce l'indice partite per coppia di codici (es. "MEX|SUD" -> id partita)
-var MATCH_INDEX = {};
-(function buildIndex(){
-  G.forEach(function(gd){
-    gd.partite.forEach(function(p){
-      var key1 = p.H + "|" + p.A;
-      var key2 = p.A + "|" + p.H; // nel caso l'API inverta casa/ospite
-      MATCH_INDEX[key1] = {id:p.id, invertito:false};
-      MATCH_INDEX[key2] = {id:p.id, invertito:true};
-    });
-  });
-})();
-
-function risultatoDaGol(golCasa, golOspite, invertito) {
-  if (golCasa === null || golOspite === null) return null;
-  if (invertito) { var tmp = golCasa; golCasa = golOspite; golOspite = tmp; }
-  if (golCasa > golOspite) return "1";
-  if (golCasa < golOspite) return "2";
-  return "X";
-}
-
-var ultimoAggiornamento = null;
-
-async function aggiornaRisultatiAPI() {
-  var statusEl = document.getElementById('api-status');
-  if (statusEl) statusEl.textContent = "⏳ Aggiornamento in corso...";
-  try {
-    var resp = await fetch(PROXY + encodeURIComponent(API_URL), {
-      headers: { "X-Auth-Token": API_KEY }
-    });
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
-    var data = await resp.json();
-    var matches = data.matches || [];
-    var trovati = 0;
-
-    matches.forEach(function(m){
-      if (m.status !== "FINISHED") return;
-      var homeCode = codiceSquadra(m.homeTeam.name);
-      var awayCode = codiceSquadra(m.awayTeam.name);
-      if (!homeCode || !awayCode) {
-        console.warn("Squadra non mappata:", m.homeTeam.name, "vs", m.awayTeam.name);
-        return;
-      }
-      var key = homeCode + "|" + awayCode;
-      var match = MATCH_INDEX[key];
-      if (!match) return;
-      var golCasa = m.score.fullTime.home;
-      var golOspite = m.score.fullTime.away;
-      var ris = risultatoDaGol(golCasa, golOspite, match.invertito);
-      if (ris) {
-        RIS[match.id] = ris;
-        trovati++;
-      }
-    });
-
-    ultimoAggiornamento = new Date();
-    if (statusEl) {
-      statusEl.textContent = "✅ Aggiornato alle " + ultimoAggiornamento.toLocaleTimeString('it-IT') + " — " + trovati + " risultati trovati";
+  let lastErr = null;
+  for (const proxy of proxies) {
+    try {
+      const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.matches) return data;     // successo
+      if (data.error)   throw new Error(data.error);
+    } catch(e) {
+      lastErr = e;
+      console.warn('Proxy fallito, provo il prossimo:', proxy, e.message);
     }
-    renderAll();
-  } catch (err) {
-    console.error("Errore aggiornamento API:", err);
-    if (statusEl) statusEl.textContent = "⚠️ Impossibile aggiornare automaticamente (riprova più tardi)";
   }
+  throw lastErr || new Error('Tutti i proxy falliti');
 }
 
+// ─── FETCH RISULTATI ──────────────────────────────────────────────────
+async function fetchRisultati() {
+  const btn  = document.getElementById('btnRefresh');
+  const info = document.getElementById('statusInfo');
+  btn.disabled = true;
+  info.innerHTML = '<span class="spinner"></span> Aggiornamento...';
 
-var gDet = 1, gIns = 1;
+  try {
+    const API_KEY = '46e1be88d1f141c9a5392183c875d71c';
+    const API_URL = 'https://api.football-data.org/v4/competitions/WC/matches?stage=LAST_32&season=2026';
 
-function totPartite(){ return G.reduce(function(s,g){return s+g.partite.length;},0); }
+    const data = await fetchWithFallback(API_URL, API_KEY);
 
-function punteggi(){
- var pt = {};
- GIOCATORI.forEach(function(g){ pt[g]={tot:0,g1:0,g2:0,g3:0}; });
- G.forEach(function(gd,gi){
-  gd.partite.forEach(function(p,i){
-   var r=RIS[p.id]; if(!r) return;
-   GIOCATORI.forEach(function(g){
-    if(P[gi][g]&&P[gi][g][i]===r){ pt[g].tot++; pt[g]["g"+(gi+1)]++; }
-   });
-  });
- });
- return pt;
-}
+    risultati = new Array(16).fill(null);
+    scores    = new Array(16).fill(null);
 
-function renderClassifica(){
- var pt = punteggi();
- var list = GIOCATORI.map(function(g){return {nome:g,tot:pt[g].tot,g1:pt[g].g1,g2:pt[g].g2,g3:pt[g].g3};});
- list.sort(function(a,b){return b.tot-a.tot;});
- var maxPt = list[0]?list[0].tot:1;
- var html='<div class="label">CLASSIFICA GENERALE &bull; '+GIOCATORI.length+' PARTECIPANTI</div>';
- list.forEach(function(p,idx){
-  var medal=["🥇","🥈","🥉"][idx]||null;
-  var barW=Math.round((p.tot/(maxPt+3))*100);
-  var cls="card"+(idx===0?" top1":idx===1?" top2":idx===2?" top3":"");
-  html+='<div class="'+cls+'">';
-  html+= medal?'<div class="medal">'+medal+'</div>':'<div class="num">'+(idx+1)+'</div>';
-  html+='<div class="info"><div class="nome">'+p.nome+'</div>';
-  html+='<div class="bar-row"><div class="bar-bg"><div class="bar-fill'+(idx===0?" top":"")+'" style="width:'+barW+'%"></div></div>';
-  html+='<div class="gbreak">G1:'+p.g1+' G2:'+p.g2+' G3:'+p.g3+'</div></div></div>';
-  html+='<div class="circle'+(idx===0?" top":"")+'">'+p.tot+'</div></div>';
- });
- document.getElementById('classifica').innerHTML=html;
- var tot=Object.keys(RIS).length;
- document.getElementById('subhead').textContent=tot+' / '+totPartite()+' risultati inseriti';
-}
+    for (const m of data.matches) {
+      const hName = m.homeTeam?.name || '';
+      const aName = m.awayTeam?.name || '';
+      const idx = TEAM_MAP[hName] ?? TEAM_MAP[aName] ?? -1;
+      if (idx === -1) continue;
 
-function renderDettaglio(){
- var gi=gDet-1;
- var partite=G[gi].partite;
- var html='<div class="table-wrap"><table><thead><tr>';
- html+='<th style="text-align:left;min-width:65px">Partita</th>';
- html+='<th style="color:#FFD600">RIS</th>';
- GIOCATORI.forEach(function(g){ html+='<th class="vname">'+g.split(" ")[0]+'</th>'; });
- html+='</tr></thead><tbody>';
- partite.forEach(function(p,i){
-  var r=RIS[p.id];
-  html+='<tr>';
-  html+='<td class="match">'+p.H+'-'+p.A+'</td>';
-  html+='<td class="ris">'+(r?'<span class="ris-badge">'+r+'</span>':'<span class="nd">—</span>')+'</td>';
-  GIOCATORI.forEach(function(g){
-   var pr=P[gi][g]?P[gi][g][i]:"?";
-   var ok=r&&pr===r, ko=r&&pr!==r;
-   html+='<td class="'+(ok?"ok-bg":ko?"ko-bg":"")+'"><span class="'+(ok?"ok":ko?"ko":"nd")+'">'+pr+'</span></td>';
-  });
-  html+='</tr>';
- });
- html+='</tbody></table></div>';
- document.getElementById('det-table').innerHTML=html;
-}
+      const status = m.status;
+      const hScore = m.score?.fullTime?.home;
+      const aScore = m.score?.fullTime?.away;
 
-function renderInserisci(){
- var gi=gIns-1;
- var partite=G[gi].partite;
- var done=partite.filter(function(p){return !!RIS[p.id];}).length;
- document.getElementById('ins-count').textContent=done+' / '+partite.length+' risultati inseriti';
- var html='';
- partite.forEach(function(p){
-  var r=RIS[p.id];
-  html+='<div class="match-row'+(r?" done":"")+'">';
-  html+='<div class="match-info"><b>'+p.hn+'</b><small>vs '+p.an+'</small></div>';
-  ["1","X","2"].forEach(function(v){
-   var selCls=r===v?(" sel"+v):"";
-   html+='<button class="btn1x2'+selCls+'" onclick="toggleRis(\''+p.id+'\',\''+v+'\')">'+v+'</button>';
-  });
-  html+='</div>';
- });
- document.getElementById('ins-list').innerHTML=html;
-}
+      if (['FINISHED','IN_PLAY','PAUSED'].includes(status) && hScore !== null && aScore !== null) {
+        scores[idx] = { h: hScore, a: aScore, live: status !== 'FINISHED' };
+        if      (hScore > aScore) risultati[idx] = '1';
+        else if (hScore === aScore) risultati[idx] = 'X';
+        else                        risultati[idx] = '2';
+      }
+    }
 
-function toggleRis(id,val){
- if(RIS[id]===val) delete RIS[id]; else RIS[id]=val;
- renderAll();
-}
+    lastUpdate = new Date();
+    const concluse = risultati.filter(r => r !== null).length;
+    info.innerHTML = `✅ <strong>Aggiornato</strong> alle ${lastUpdate.toLocaleTimeString('it-IT')} · ${concluse}/16 partite concluse`;
 
-function renderAll(){
- renderClassifica();
- renderDettaglio();
- renderInserisci();
-}
-
-function showTab(name){
- document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
- document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
- document.getElementById(name).classList.add('active');
- event.target.classList.add('active');
-}
-
-function setGdet(g,btn){
- gDet=g;
- document.querySelectorAll('#dettaglio .gbtn').forEach(function(b){b.classList.remove('active');});
- btn.classList.add('active');
- renderDettaglio();
-}
-
-function setGins(g,btn){
- gIns=g;
- document.querySelectorAll('#inserisci .gbtn').forEach(function(b){b.classList.remove('active');});
- btn.classList.add('active');
- renderInserisci();
-}
-
-renderAll();
-aggiornaRisultatiAPI();
-</script>
-
-<div id="install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;
-  background:#1E88E5;color:#fff;padding:14px 16px;z-index:9999;
-  display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;
-  box-shadow:0 -2px 12px rgba(0,0,0,0.4);">
-  <span style="font-size:22px">⚽</span>
-  <span style="flex:1">Aggiungi alla schermata Home!</span>
-  <button onclick="installApp()" style="background:#fff;color:#1E88E5;border:none;
-    border-radius:8px;padding:8px 14px;font-weight:800;font-size:13px;cursor:pointer;">
-    Installa
-  </button>
-  <button onclick="document.getElementById('install-banner').style.display='none'"
-    style="background:rgba(255,255,255,0.2);color:#fff;border:none;border-radius:8px;
-    padding:8px 10px;font-size:16px;cursor:pointer;">✕</button>
-</div>
-
-<script>
-// Service Worker inline per funzionamento offline
-var SW_CODE = `
-self.addEventListener('install', function(e) {
-  e.waitUntil(
-    caches.open('mondiale2026-v1').then(function(cache) {
-      return cache.addAll([location.href]);
-    })
-  );
-});
-self.addEventListener('fetch', function(e) {
-  e.respondWith(
-    caches.match(e.request).then(function(r) {
-      return r || fetch(e.request).catch(function(){return caches.match(e.request);});
-    })
-  );
-});
-`;
-
-if('serviceWorker' in navigator) {
-  var blob = new Blob([SW_CODE], {type:'application/javascript'});
-  var swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(function(){});
-}
-
-// Banner installazione PWA
-var deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('install-banner').style.display = 'flex';
-});
-
-function installApp() {
-  if(!deferredPrompt) {
-    alert('Per installare:\nChrome → menu (⋮) → "Aggiungi a schermata Home"\nSafari → condividi (□↑) → "Aggiungi a schermata Home"');
-    return;
+  } catch(e) {
+    info.innerHTML = `⚠️ Errore aggiornamento: ${e.message}`;
+    console.error(e);
   }
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(function(){
-    deferredPrompt = null;
-    document.getElementById('install-banner').style.display = 'none';
+
+  renderMatches();
+  renderClassifica();
+  btn.disabled = false;
+}
+
+// ─── RENDER PARTITE ───────────────────────────────────────────────────
+function renderMatches() {
+  const grid = document.getElementById('matchesGrid');
+  grid.innerHTML = '';
+  PARTITE_INFO.forEach((p, i) => {
+    const s = scores[i];
+    const r = risultati[i];
+    const div = document.createElement('div');
+    div.className = 'match-card';
+    const scoreStr = s ? `${s.h} – ${s.a}${s.live ? ' 🔴' : ''}` : '– –';
+    let esitoStr  = 'Non ancora giocata';
+    let esitoClass = 'pending';
+    if (r === '1') { esitoStr = '1 (vittoria casa)';   esitoClass = 'e1'; }
+    if (r === 'X') { esitoStr = 'X (pareggio)';        esitoClass = 'eX'; }
+    if (r === '2') { esitoStr = '2 (vittoria ospite)'; esitoClass = 'e2'; }
+    div.innerHTML = `
+      <div class="partita-num">Partita ${i+1}</div>
+      <div class="teams">
+        <div class="team-name">${p.home}</div>
+        <div class="score-box">${scoreStr}</div>
+        <div class="team-name right">${p.away}</div>
+      </div>
+      <div class="esito ${esitoClass}">${esitoStr}</div>`;
+    grid.appendChild(div);
   });
 }
 
-// Su iOS mostra istruzioni manuali
-var isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-var isInStandalone = window.navigator.standalone;
-if(isIos && !isInStandalone) {
-  setTimeout(function(){
-    document.getElementById('install-banner').style.display = 'flex';
-    document.querySelector('#install-banner span:nth-child(2)').textContent =
-      'Safari → 🔗 Condividi → "Aggiungi a schermata Home"';
-    document.querySelector('#install-banner button').style.display = 'none';
-  }, 2000);
+// ─── RENDER CLASSIFICA ────────────────────────────────────────────────
+function renderClassifica() {
+  const rows = PARTECIPANTI.map((p, i) => {
+    const pron = PRONOSTICI[i];
+    let pts16 = 0;
+    risultati.forEach((r, m) => {
+      if (r && pron[m] && pron[m] === r) pts16++;
+    });
+    return { ...p, pts16, tot: p.base + pts16, pron };
+  });
+
+  rows.sort((a, b) => b.tot - a.tot || b.base - a.base);
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  rows.forEach((p, rank) => {
+    const medal = ['🥇','🥈','🥉'][rank] || '';
+    let cells = '';
+    for (let m = 0; m < 16; m++) {
+      const v = p.pron[m];
+      const r = risultati[m];
+      let cls = v === '1' ? 'v1' : v === 'X' ? 'vX' : v === '2' ? 'v2' : 'empty';
+      if (r && v && r === v) cls += ' ok';
+      cells += `<td><div class="cell ${cls}">${v || '–'}</div></td>`;
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="rank">${medal || (rank+1)}</td>
+      <td class="name-col">${p.nome}</td>
+      ${cells}
+      <td class="pts-base sep">${p.base}</td>
+      <td class="pts-16">${p.pts16}</td>
+      <td class="pts-tot sep">${p.tot}</td>`;
+    tbody.appendChild(tr);
+  });
 }
+
+// ─── INIT ─────────────────────────────────────────────────────────────
+fetchRisultati();
+setInterval(fetchRisultati, 3 * 60 * 1000);
 </script>
 </body>
 </html>
