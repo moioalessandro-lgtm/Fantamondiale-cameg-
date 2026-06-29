@@ -323,8 +323,15 @@ async function fetchRisultati() {
         if (idx === -1) continue;
 
         const status = m.status;
-        const hScore = m.score?.fullTime?.home;
-        const aScore = m.score?.fullTime?.away;
+        
+        const hScore = m.score?.fullTime?.home 
+  ?? m.score?.regularTime?.home 
+  ?? m.score?.currentScore?.home 
+  ?? null;
+const aScore = m.score?.fullTime?.away 
+  ?? m.score?.regularTime?.away 
+  ?? m.score?.currentScore?.away 
+  ?? null;
 
         if ((status === 'FINISHED' || status === 'IN_PLAY' || status === 'PAUSED') && hScore !== null && aScore !== null) {
           scores[idx] = { h: hScore, a: aScore, live: status !== 'FINISHED' };
