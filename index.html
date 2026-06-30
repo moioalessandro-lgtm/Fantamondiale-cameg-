@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Classifica Live — Sedicesimi FantaMondiale Cameg 2026</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+    :root {
+      --bg:#0a0e1a; --surface:#111827; --surface2:#1a2236;
+      --border:#1e2d45; --accent:#f59e0b; --accent2:#3b82f6;
+      --text:#f1f5f9; --muted:#64748b;
+      --win:#22c55e; --draw:#f59e0b; --loss:#ef4444;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+
+    header {
+      background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);
+      border-bottom:2px solid var(--accent);
+      padding:1.5rem 1.5rem 1.2rem; text-align:center; position:relative; overflow:hidden;
+    }
+    header::before { content:'⚽'; position:absolute; font-size:12rem; opacity:0.04; top:-2rem; right:-2rem; transform:rotate(-15deg); }
+    .badge { display:inline-block; background:var(--accent); color:#0a0e1a; font-size:0.7rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; padding:0.25rem 0.75rem; border-radius:999px; margin-bottom:0.6rem; }
+    h1 { font-family:'Bebas Neue',cursive; font-size:clamp(1.8rem,5vw,2.8rem); letter-spacing:0.04em; color:#fff; }
+    h1 span { color:var(--accent); }
+    .subtitle { margin-top:0.3rem; color:var(--muted); font-size:0.82rem; }
+
+    main { max-width:900px; margin:0 auto; padding:1rem 0.75rem 3rem; }
+
+    .status-bar {
+      background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+      padding:0.75rem 1rem; margin-bottom:1rem;
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;
+    }
+    .status-bar .info { font-size:0.8rem; color:var(--muted); }
+    .status-bar .info strong { color:var(--text); }
+    .btn-refresh {
+      background:var(--accent2); color:#fff; border:none; border-radius:7px;
+      padding:0.45rem 1rem; font-size:0.8rem; font-weight:700; cursor:pointer;
+      transition:opacity 0.15s;
+    }
+    .btn-refresh:hover { opacity:0.85; }
+    .btn-refresh:disabled { opacity:0.5; cursor:not-allowed; }
+
+    .section-label {
+      font-family:'Bebas Neue',cursive; font-size:1rem; letter-spacing:0.1em;
+      color:var(--muted); text-transform:uppercase; margin:1rem 0 0.6rem;
+      display:flex; align-items:center; gap:0.5rem;
+    }
+    .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    .matches-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+      gap:0.5rem; margin-bottom:1rem;
+    }
+    .match-card {
+      background:var(--surface); border:1px solid var(--border); border-radius:8px;
+      padding:0.6rem 0.8rem;
+    }
+    .match-card .teams { display:flex; justify-content:space-between; align-items:center; gap:0.3rem; }
+    .match-card .team-name { font-size:0.78rem; font-weight:600; flex:1; }
+    .match-card .team-name.right { text-align:right; }
+    .match-card .score-box {
+      font-family:'Bebas Neue',cursive; font-size:1.1rem; letter-spacing:0.05em;
+      background:var(--surface2); border-radius:5px; padding:0.1rem 0.5rem;
+      color:var(--accent); white-space:nowrap; min-width:50px; text-align:center;
+    }
+    .match-card .esito {
+      text-align:center; margin-top:0.3rem; font-size:0.7rem; font-weight:700;
+      letter-spacing:0.08em;
+    }
+    .esito.e1 { color:var(--win); }
+    .esito.eX { color:var(--draw); }
+    .esito.e2 { color:var(--loss); }
+    .esito.pending { color:var(--muted); }
+    .match-card .partita-num { font-size:0.65rem; color:var(--muted); margin-bottom:0.3rem; }
+    .match-card .nota-90 { text-align:center; margin-top:0.15rem; font-size:0.6rem; color:var(--accent2); font-weight:600; }
+
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+    thead th {
+      background:var(--surface2); padding:0.55rem 0.3rem;
+      text-align:center; font-size:0.62rem; font-weight:700;
+      letter-spacing:0.06em; color:var(--muted); text-transform:uppercase;
+      border-bottom:2px solid var(--border); white-space:nowrap;
+      position:sticky; top:0; z-index:2;
+    }
+    thead th.name-col { text-align:left; min-width:130px; padding-left:0.6rem; }
+    thead th.sep { border-left:2px solid var(--border); }
+    tbody tr { transition:background 0.1s; }
+    tbody tr:nth-child(even) { background:rgba(255,255,255,0.02); }
+    tbody tr:hover { background:rgba(59,130,246,0.07); }
+    td { padding:0.4rem 0.25rem; text-align:center; border-bottom:1px solid var(--border); vertical-align:middle; }
+    td.rank { color:var(--muted); font-size:0.72rem; font-weight:700; width:24px; }
+    td.name-col { text-align:left; padding-left:0.6rem; font-weight:600; white-space:nowrap; }
+    td.pts-base { font-weight:700; color:var(--accent); font-size:0.88rem; border-left:2px solid var(--border); }
+    td.pts-16 { font-weight:700; color:var(--accent2); font-size:0.88rem; }
+    td.pts-tot { font-weight:700; color:var(--win); font-size:0.92rem; border-left:2px solid var(--border); }
+    td.pos-change { font-size:0.7rem; width:20px; }
+
+    .cell { width:30px; height:26px; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; font-family:'Bebas Neue',cursive; font-size:0.9rem; border:1px solid transparent; }
+    .cell.v1 { background:rgba(34,197,94,0.18); border-color:rgba(34,197,94,0.3); color:var(--win); }
+    .cell.vX { background:rgba(245,158,11,0.18); border-color:rgba(245,158,11,0.3); color:var(--draw); }
+    .cell.v2 { background:rgba(239,68,68,0.18); border-color:rgba(239,68,68,0.3); color:var(--loss); }
+    .cell.empty { background:var(--surface2); color:var(--muted); font-size:0.6rem; }
+    .cell.ok { outline:2px solid var(--accent2); background:rgba(59,130,246,0.25); }
+
+    .medal { font-size:1rem; }
+
+    footer { text-align:center; color:var(--muted); font-size:0.73rem; padding:2rem 1rem 1.5rem; border-top:1px solid var(--border); }
+    footer a { color:var(--accent2); text-decoration:none; }
+
+    .spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--muted); border-top-color:var(--accent2); border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:4px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">⚽ FIFA World Cup 2026</div>
+  <h1>Classifica <span>Live</span></h1>
+  <p class="subtitle">Sedicesimi di finale · FantaMondiale Cameg 2026</p>
+</header>
+
+<main>
+  <div class="status-bar">
+    <div class="info" id="statusInfo"><span class="spinner"></span> Caricamento risultati...</div>
+    <button class="btn-refresh" id="btnRefresh" onclick="fetchRisultati()">🔄 Aggiorna</button>
+    <button class="btn-refresh" style="background:#ef4444" onclick="debugRaw()">🐞 Debug JSON</button>
+  </div>
+  <pre id="debugBox" style="display:none;white-space:pre-wrap;background:#000;color:#0f0;padding:1rem;border-radius:8px;font-size:0.65rem;margin-bottom:1rem;max-height:400px;overflow:auto;"></pre>
+
+  <div class="section-label">📊 Risultati partite (90 minuti)</div>
+  <div class="matches-grid" id="matchesGrid"></div>
+
+  <div class="section-label">🏆 Classifica generale (gironi + sedicesimi)</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:24px">#</th>
+          <th class="name-col">Nome</th>
+          <th>SAF<br>CAN</th><th>BRA<br>JAP</th><th>GER<br>PAR</th><th>NED<br>MAR</th>
+          <th>CIV<br>NOR</th><th>FRA<br>SVE</th><th>MEX<br>ECU</th><th>ING<br>CGO</th>
+          <th>BEL<br>SEN</th><th>USA<br>BIH</th><th>ESP<br>AUT</th><th>POR<br>CRO</th>
+          <th>SUI<br>ALG</th><th>AUS<br>EGI</th><th>ARG<br>CPV</th><th>COL<br>GHA</th>
+          <th class="sep">BASE</th><th>+16</th><th class="sep">TOT</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;font-size:0.73rem;color:var(--muted);">
+    <span>🟦 = pronostico esatto</span>
+    <span style="margin-left:auto">BASE = gironi · +16 = sedicesimi · TOT = totale</span>
+  </div>
+</main>
+
+<footer>
+  FantaMondiale Cameg 2026 · <a href="https://moioalessandro-lgtm.github.io/Fantamondiale-cameg-/?v=2" target="_blank">Apri l'App</a>
+</footer>
+
+<script>
+// ─── DATI PARTECIPANTI ───────────────────────────────────────────────
+const PARTECIPANTI = [
+  { nome:"Ivan",              base:49 },
+  { nome:"Simone",            base:45 },
+  { nome:"Luigi",             base:44 },
+  { nome:"Vittorio",          base:43 },
+  { nome:"Andrea Magliano",   base:42 },
+  { nome:"Andrea Udito",      base:42 },
+  { nome:"Raffaele Turco",    base:42 },
+  { nome:"Giuseppe D'Altrui", base:41 },
+  { nome:"Fabio",             base:41 },
+  { nome:"Michele",           base:41 },
+  { nome:"Massimo Moio",      base:41 },
+  { nome:"Dario",             base:41 },
+  { nome:"Gianni Di Scala",   base:40 },
+  { nome:"Antonio Esposito",  base:40 },
+  { nome:"Roberto Pappa",     base:40 },
+  { nome:"Alessandro Moio",   base:39 },
+  { nome:"Giuseppe Cangiano", base:38 },
+  { nome:"Fulvio",            base:37 },
+  { nome:"Vincenzo Ambra",    base:36 },
+  { nome:"Enrico Caruso",     base:36 },
+  { nome:"Antonio Orefice",   base:34 },
+  { nome:"Marco",             base:33 },
+  { nome:"Andrea Cangiano",   base:32 },
+  { nome:"Enrico Popolo",     base:32 },
+];
+
+// ─── PRONOSTICI ───────────────────────────────────────────────────────
+// Partite: 0=SAF-CAN, 1=BRA-JAP, 2=GER-PAR, 3=NED-MAR, 4=CIV-NOR,
+//          5=FRA-SVE,  6=MEX-ECU, 7=ING-CGO, 8=BEL-SEN, 9=USA-BIH,
+//         10=ESP-AUT, 11=POR-CRO, 12=SUI-ALG,13=AUS-EGI,14=ARG-CPV, 15=COL-GHA
+const PRONOSTICI = [
+  ['2','1','1','X','2','1','1','1','1','1','1','X','X','2','1','1'],
+  ['2','1','1','1','2','1','1','1','1','1','1','2','1','1','1','1'],
+  ['2','1','1','2','2','1','1','1','1','1','1','2','X','X','1','1'],
+  ['2','1','1','1','2','1','1','1','1','1','1','1','1','2','1','1'],
+  ['2','X','1','X','X','1','X','1','X','1','1','1','1','2','1','1'],
+  ['X','1','1','X','2','1','1','X','X','X','1','1','1','2','1','X'],
+  ['2','1','1','X','X','1','1','1','1','1','1','1','1','X','1','X'],
+  ['X','X','1','X','X','1','1','1','X','1','1','1','X','2','1','1'],
+  ['X','1','1','X','2','1','X','1','X','1','1','1','1','X','1','1'],
+  ['2','X','1','X','2','1','X','1','2','1','X','2','1','2','1','X'],
+  ['2','1','1','2','2','1','1','1','X','1','1','X','X','X','1','1'],
+  ['2','X','1','2','X','1','1','1','X','1','1','X','1','X','1','X'],
+  ['2','1','1','X','2','1','1','1','1','1','1','X','1','1','1','X'],
+  ['X','1','1','2','2','1','X','1','1','2','1','1','X','2','1','2'],
+  ['2','1','1','1','2','1','2','1','1','1','1','1','1','2','1','1'],
+  ['X','1','1','X','2','1','1','1','X','1','1','1','1','X','1','1'],
+  ['2','1','X','1','2','1','1','1','1','1','X','1','1','1','1','X'],
+  [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+  [null,'1','1','X','2','1','1','1','1','1','X','1','1','2','1','1'],
+  ['1','1','1','2','2','1','1','1','1','2','1','2','1','1','1','1'],
+  ['2','X','1','X','1','1','1','1','X','1','1','X','1','2','1','1'],
+  ['2','X','1','2','2','1','1','1','1','1','1','X','1','2','1','1'],
+  ['2','1','1','X','2','1','1','1','1','1','1','X','1','2','1','1'],
+  ['2','1','1','1','2','1','1','1','X','1','1','X','1','2','1','1'],
+];
+
+// ─── PARTITE INFO ─────────────────────────────────────────────────────
+const PARTITE_INFO = [
+  { label:'Sudafrica – Canada',         home:'SAF', away:'CAN' },
+  { label:'Brasile – Giappone',         home:'BRA', away:'JAP' },
+  { label:'Germania – Paraguay',        home:'GER', away:'PAR' },
+  { label:'Paesi Bassi – Marocco',      home:'NED', away:'MAR' },
+  { label:"Costa d'Avorio – Norvegia",  home:'CIV', away:'NOR' },
+  { label:'Francia – Svezia',           home:'FRA', away:'SVE' },
+  { label:'Messico – Ecuador',          home:'MEX', away:'ECU' },
+  { label:'Inghilterra – Congo',        home:'ING', away:'CGO' },
+  { label:'Belgio – Senegal',           home:'BEL', away:'SEN' },
+  { label:'USA – Bosnia',               home:'USA', away:'BIH' },
+  { label:'Spagna – Austria',           home:'ESP', away:'AUT' },
+  { label:'Portogallo – Croazia',       home:'POR', away:'CRO' },
+  { label:'Svizzera – Algeria',         home:'SUI', away:'ALG' },
+  { label:'Australia – Egitto',         home:'AUS', away:'EGI' },
+  { label:'Argentina – Capo Verde',     home:'ARG', away:'CPV' },
+  { label:'Colombia – Ghana',           home:'COL', away:'GHA' },
+];
+
+// ─── TEAM MAP (nomi come restituiti da API-Football) ──────────────────
+const TEAM_MAP = {
+  'South Africa':0,'Canada':0,
+  'Brazil':1,'Japan':1,
+  'Germany':2,'Paraguay':2,
+  'Netherlands':3,'Morocco':3,
+  'Ivory Coast':4,"Côte d'Ivoire":4,'Norway':4,
+  'France':5,'Sweden':5,
+  'Mexico':6,'Ecuador':6,
+  'England':7,'DR Congo':7,'Congo':7,'Congo DR':7,
+  'Belgium':8,'Senegal':8,
+  'United States':9,'USA':9,'Bosnia and Herzegovina':9,'Bosnia':9,
+  'Spain':10,'Austria':10,
+  'Portugal':11,'Croatia':11,
+  'Switzerland':12,'Algeria':12,
+  'Australia':13,'Egypt':13,
+  'Argentina':14,'Cape Verde':14,
+  'Colombia':15,'Ghana':15,
+};
+
+let risultati = new Array(16).fill(null);
+let scores    = new Array(16).fill(null);
+let lastUpdate = null;
+
+// ─── CONFIG football-data.org ──────────────────────────────────────────
+// L'API supporta CORS nativamente (Access-Control-Allow-Origin: *),
+// quindi chiamiamo direttamente dal browser con l'header X-Auth-Token,
+// senza bisogno di proxy di terzi (che sono spesso instabili).
+const API_KEY = '46e1be88d1f141c9a5392183c875d71c';
+const API_URL = 'https://api.football-data.org/v4/competitions/WC/matches?stage=LAST_32&season=2026';
+
+async function fetchWithFallback(apiUrl, apiKey) {
+  // 1) tentativo diretto (CORS nativo dell'API)
+  try {
+    const res = await fetch(apiUrl, {
+      headers: { 'X-Auth-Token': apiKey },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.matches) return data;
+    }
+  } catch(e) {
+    console.warn('Chiamata diretta fallita, provo i proxy di fallback:', e.message);
+  }
+
+  // 2) fallback su proxy pubblici, nel caso la rete blocchi la chiamata diretta
+  const urlWithKey = `${apiUrl}&X-Auth-Token=${apiKey}`;
+  const proxies = [
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(urlWithKey)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(urlWithKey)}`,
+    `https://thingproxy.freeboard.io/fetch/${urlWithKey}`,
+  ];
+  let lastErr = null;
+  for (const proxy of proxies) {
+    try {
+      const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.matches) return data;
+      if (data.error)   throw new Error(data.error);
+    } catch(e) {
+      lastErr = e;
+      console.warn('Proxy fallito, provo il prossimo:', proxy, e.message);
+    }
+  }
+  throw lastErr || new Error('Tutti i tentativi falliti');
+}
+
+// ─── FETCH RISULTATI ──────────────────────────────────────────────────
+async function fetchRisultati() {
+  const btn  = document.getElementById('btnRefresh');
+  const info = document.getElementById('statusInfo');
+  btn.disabled = true;
+  info.innerHTML = '<span class="spinner"></span> Aggiornamento...';
+
+  try {
+    const data = await fetchWithFallback(API_URL, API_KEY);
+
+    risultati = new Array(16).fill(null);
+    scores    = new Array(16).fill(null);
+
+    for (const m of data.matches) {
+      const hName = m.homeTeam?.name || '';
+      const aName = m.awayTeam?.name || '';
+      const idx = TEAM_MAP[hName] ?? TEAM_MAP[aName] ?? -1;
+      if (idx === -1) continue;
+
+      const status = m.status;
+      // score.regularTime = punteggio ESATTO dei 90 minuti, sempre,
+      // anche se la partita e' poi andata a supplementari/rigori.
+      // (score.fullTime invece e' cumulativo e include tutto)
+      let hScore = m.score?.regularTime?.homeTeam;
+      let aScore = m.score?.regularTime?.awayTeam;
+      if (hScore === null || hScore === undefined) hScore = m.score?.fullTime?.homeTeam;
+      if (aScore === null || aScore === undefined) aScore = m.score?.fullTime?.awayTeam;
+
+      if (['FINISHED','IN_PLAY','PAUSED'].includes(status) && hScore !== null && hScore !== undefined && aScore !== null && aScore !== undefined) {
+        scores[idx] = { h: hScore, a: aScore, live: status !== 'FINISHED' };
+        if      (hScore > aScore) risultati[idx] = '1';
+        else if (hScore === aScore) risultati[idx] = 'X';
+        else                        risultati[idx] = '2';
+      }
+    }
+
+    lastUpdate = new Date();
+    const concluse = risultati.filter(r => r !== null).length;
+    info.innerHTML = `✅ <strong>Aggiornato</strong> alle ${lastUpdate.toLocaleTimeString('it-IT')} · ${concluse}/16 partite concluse`;
+
+  } catch(e) {
+    info.innerHTML = `⚠️ Errore aggiornamento: ${e.message}`;
+    console.error(e);
+  }
+
+  renderMatches();
+  renderClassifica();
+  btn.disabled = false;
+}
+
+// ─── RENDER PARTITE ───────────────────────────────────────────────────
+function renderMatches() {
+  const grid = document.getElementById('matchesGrid');
+  grid.innerHTML = '';
+  PARTITE_INFO.forEach((p, i) => {
+    const s = scores[i];
+    const r = risultati[i];
+    const div = document.createElement('div');
+    div.className = 'match-card';
+    const scoreStr = s ? `${s.h} – ${s.a}${s.live ? ' 🔴' : ''}` : '– –';
+    let esitoStr  = 'Non ancora giocata';
+    let esitoClass = 'pending';
+    if (r === '1') { esitoStr = '1 (vittoria casa)';   esitoClass = 'e1'; }
+    if (r === 'X') { esitoStr = 'X (pareggio)';        esitoClass = 'eX'; }
+    if (r === '2') { esitoStr = '2 (vittoria ospite)'; esitoClass = 'e2'; }
+    div.innerHTML = `
+      <div class="partita-num">Partita ${i+1}</div>
+      <div class="teams">
+        <div class="team-name">${p.home}</div>
+        <div class="score-box">${scoreStr}</div>
+        <div class="team-name right">${p.away}</div>
+      </div>
+      <div class="esito ${esitoClass}">${esitoStr}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+// ─── RENDER CLASSIFICA ────────────────────────────────────────────────
+function renderClassifica() {
+  const rows = PARTECIPANTI.map((p, i) => {
+    const pron = PRONOSTICI[i];
+    let pts16 = 0;
+    risultati.forEach((r, m) => {
+      if (r && pron[m] && pron[m] === r) pts16++;
+    });
+    return { ...p, pts16, tot: p.base + pts16, pron };
+  });
+
+  rows.sort((a, b) => b.tot - a.tot || b.base - a.base);
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  rows.forEach((p, rank) => {
+    const medal = ['🥇','🥈','🥉'][rank] || '';
+    let cells = '';
+    for (let m = 0; m < 16; m++) {
+      const v = p.pron[m];
+      const r = risultati[m];
+      let cls = v === '1' ? 'v1' : v === 'X' ? 'vX' : v === '2' ? 'v2' : 'empty';
+      if (r && v && r === v) cls += ' ok';
+      cells += `<td><div class="cell ${cls}">${v || '–'}</div></td>`;
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="rank">${medal || (rank+1)}</td>
+      <td class="name-col">${p.nome}</td>
+      ${cells}
+      <td class="pts-base sep">${p.base}</td>
+      <td class="pts-16">${p.pts16}</td>
+      <td class="pts-tot sep">${p.tot}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── DEBUG: mostra il JSON grezzo a schermo ────────────────────────────
+async function debugRaw() {
+  const box = document.getElementById('debugBox');
+  box.style.display = 'block';
+  box.textContent = 'Carico...';
+  try {
+    const data = await fetchWithFallback(API_URL, API_KEY);
+    const interessanti = (data.matches || []).filter(m => {
+      const h = m.homeTeam?.name || '';
+      const a = m.awayTeam?.name || '';
+      return [h,a].some(n => ['Germany','Paraguay','Netherlands','Morocco'].includes(n));
+    });
+    box.textContent = JSON.stringify(interessanti.length ? interessanti : data, null, 2);
+  } catch(e) {
+    box.textContent = 'Errore: ' + e.message;
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────
+fetchRisultati();
+setInterval(fetchRisultati, 3 * 60 * 1000);
+</script>
+</body>
+</html>
